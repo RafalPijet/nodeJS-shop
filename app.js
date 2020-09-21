@@ -1,12 +1,12 @@
 const express = require('express');
 const path = require('path');
+require('dotenv').config();
 const bodyParser = require('body-parser');
-
+const mongoose = require('mongoose');
 const rootDir = require('./util/path');
 const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
 const errorController = require('./controllers/error');
-const mongoConnect = require('./util/database').mongoConnect;
 const User = require('./models/user');
 
 const app = express();
@@ -16,19 +16,38 @@ app.set('views', 'views');
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(express.static(path.join(rootDir, 'public')));
 // app.use(express.urlencoded({extended: false}));
+
 app.use((req, res, next) => {
-    User.findUserById("5f632ac1dab4d133f60d8d11")
+    User.findById('5f685d895fecbf0a67830f34')
         .then(user => {
-            req.user = new User(user.name, user.email, user.cart, user._id);
+            req.user = user;
             next();
         })
-        .catch(err => console.log(err))
+        .catch(err => console.log(err));
 })
+
 app.use('/admin', adminRoutes);
 app.use(shopRoutes);
 app.use(errorController.get404Page);
 
-mongoConnect(() => {
-    app.listen(3003);
-})
+mongoose.connect(process.env.MONGO_DB_ACCESS)
+    .then(() => {
+        User.findOne()
+            .then(user => {
 
+                if (!user) {
+                    const user = new User({
+                        name: 'David',
+                        email: 'david@gmail.com',
+                        cart: {
+                            items: []
+                        }
+                    })
+                    user.save();
+                }
+            })
+            .catch(err => console.log(err));
+        app.listen(3003);
+        console.log('Database is connected')
+    })
+    .catch(err => console.log(err));
