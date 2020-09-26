@@ -47,22 +47,25 @@ exports.postEditProduct = (req, res) => {
     const { title, imageUrl, price, description } = req.body;
     Product.findById(productId)
         .then(product => {
+
+            if (product.userId.toString() !== req.user._id.toString()) {
+                return res.redirect('/');
+            }
             product.title = title;
             product.price = price;
             product.description = description;
             product.imageUrl = imageUrl;
             return product.save()
-        })
-        .then(() => {
-            console.log('Product has UPDATED!!!')
-            res.redirect('/admin/products');
+            .then(() => {
+                console.log('Product has UPDATED!!!')
+                res.redirect('/admin/products');
+            })
         })
         .catch(err => console.log(err));
 };
 
 exports.getAdminProducts = (req, res) => {
-    Product.find()
-        // .populate('userId', 'name cart -_id')
+    Product.find({userId: req.user._id})
         .then(products => {
             console.log(products);
             res.render('admin/products', {
@@ -76,7 +79,7 @@ exports.getAdminProducts = (req, res) => {
 
 exports.deleteProduct = (req, res) => {
     const { productId } = req.params;
-    Product.findByIdAndRemove(productId)
+    Product.deleteOne({_id: productId, userId: req.user._id})
         .then(() => {
             res.redirect('/admin/products');
         })
