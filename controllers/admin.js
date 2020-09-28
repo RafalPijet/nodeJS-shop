@@ -67,7 +67,6 @@ exports.postEditProduct = (req, res) => {
 exports.getAdminProducts = (req, res) => {
     Product.find({userId: req.user._id})
         .then(products => {
-            console.log(products);
             res.render('admin/products', {
                 products,
                 docTitle: 'Admin Products',

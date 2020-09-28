@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const nodemailer = require('nodemailer');
 const sendgridTransport = require('nodemailer-sendgrid-transport');
+const { validationResult } = require('express-validator/check');
 const crypto = require('crypto');
 require('dotenv').config();
 
@@ -87,34 +88,29 @@ exports.getSignup = (req, res, next) => {
     })
 }
 exports.postSignup = (req, res, next) => {
-    const { email, password, confirmPassword } = req.body;
+    const { email, password } = req.body;
+    const errors = validationResult(req);
 
-    if (password !== confirmPassword) {
-        req.flash('error', 'Passowrd and Confirm Password field are different!!!');
-        return res.redirect('/signup');
+    if (!errors.isEmpty()) {
+        return res.status(422).render('auth/signup', {
+            path: '/signup',
+            docTitle: 'Signup',
+            errorMessage: errors.array()[0].msg
+        })
     }
-    User.findOne({ email })
-        .then(foundUser => {
-
-            if (foundUser) {
-                req.flash('error', 'User already exists')
-                return res.redirect('/signup')
-            }
-            return bcrypt.hash(password, 12)
-                .then(decryptedPassword => {
-                    const user = new User({ email, password: decryptedPassword, cart: { items: [] } });
-                    return user.save();
-                })
-                .then(() => {
-                    res.redirect('/login');
-                    return transporter.sendMail({
-                        to: email,
-                        from: 'stronglopez@wp.pl',
-                        subject: 'Signup succeeded!',
-                        html: '<h1>You successfuly signed up!</h1>'
-                    })
-                })
-                .catch(err => console.log(err));
+    bcrypt.hash(password, 12)
+        .then(decryptedPassword => {
+            const user = new User({ email, password: decryptedPassword, cart: { items: [] } });
+            return user.save();
+        })
+        .then(() => {
+            res.redirect('/login');
+            return transporter.sendMail({
+                to: email,
+                from: 'stronglopez@wp.pl',
+                subject: 'Signup succeeded!',
+                html: '<h1>You successfuly signed up!</h1>'
+            })
         })
         .catch(err => console.log(err));
 }
@@ -194,26 +190,26 @@ exports.getNewPassword = (req, res, next) => {
 }
 
 exports.postNewPassword = (req, res, next) => {
-    const {password, userId, passwordToken} = req.body;
+    const { password, userId, passwordToken } = req.body;
     let resetUser;
-    User.findOne({resetToken: passwordToken, resetTokenExpiration: {$gt: Date.now()}, _id: userId})
-    .then(user => {
+    User.findOne({ resetToken: passwordToken, resetTokenExpiration: { $gt: Date.now() }, _id: userId })
+        .then(user => {
 
-        if (!user) {
-            req.flash('error', "Something's wrong!!!");
-            return res.redirect('/login')
-        }
-        resetUser = user;
-        return bcrypt.hash(password, 12)
-    })
-    .then(decryptedPassword => {
-        resetUser.password = decryptedPassword;
-        resetUser.resetToken = undefined;
-        resetUser.resetTokenExpiration = undefined;
-        return resetUser.save();
-    })
-    .then(() => {
-        res.redirect('/login');
-    })
-    .catch(err => console.log(err))
+            if (!user) {
+                req.flash('error', "Something's wrong!!!");
+                return res.redirect('/login')
+            }
+            resetUser = user;
+            return bcrypt.hash(password, 12)
+        })
+        .then(decryptedPassword => {
+            resetUser.password = decryptedPassword;
+            resetUser.resetToken = undefined;
+            resetUser.resetTokenExpiration = undefined;
+            return resetUser.save();
+        })
+        .then(() => {
+            res.redirect('/login');
+        })
+        .catch(err => console.log(err))
 }
