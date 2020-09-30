@@ -29,7 +29,7 @@ exports.getLogin = (req, res, next) => {
         docTitle: 'Login',
         path: '/login',
         errorMessage: message,
-        oldInput: {email: '', password: ''},
+        oldInput: { email: '', password: '' },
         validationErrors: []
     })
 }
@@ -43,7 +43,7 @@ exports.postLogin = (req, res, next) => {
             path: '/login',
             docTitle: 'Login',
             errorMessage: errors.array()[0].msg,
-            oldInput: {email, password},
+            oldInput: { email, password },
             validationErrors: errors.array()
         })
     }
@@ -67,7 +67,11 @@ exports.postLogin = (req, res, next) => {
                     res.redirect('/login')
                 })
         })
-        .catch(err => console.log(err));
+        .catch(err => {
+            const error = new Error(err);
+            err.httpStatusCode = 500;
+            return next(error);
+        });
     // res.setHeader('Set-Cookie', 'loggedIn=true')
 }
 
@@ -90,7 +94,7 @@ exports.getSignup = (req, res, next) => {
         path: '/signup',
         docTitle: 'Signup',
         errorMessage: message,
-        oldInput: {email: '', password: '', confirmPassword: ''},
+        oldInput: { email: '', password: '', confirmPassword: '' },
         validationErrors: []
     })
 }
@@ -103,7 +107,7 @@ exports.postSignup = (req, res, next) => {
             path: '/signup',
             docTitle: 'Signup',
             errorMessage: errors.array()[0].msg,
-            oldInput: {email, password, confirmPassword},
+            oldInput: { email, password, confirmPassword },
             validationErrors: errors.array()
         })
     }
@@ -121,7 +125,11 @@ exports.postSignup = (req, res, next) => {
                 html: '<h1>You successfuly signed up!</h1>'
             })
         })
-        .catch(err => console.log(err));
+        .catch(err => {
+            const error = new Error(err);
+            err.httpStatusCode = 500;
+            return next(error);
+        });
 }
 
 exports.getReset = (req, res, next) => {
@@ -171,7 +179,11 @@ exports.postReset = (req, res, next) => {
                 `
                 })
             })
-            .catch(err => console.log(err));
+            .catch(err => {
+                const error = new Error(err);
+                err.httpStatusCode = 500;
+                return next(error);
+            });
     })
 }
 
@@ -194,7 +206,11 @@ exports.getNewPassword = (req, res, next) => {
                 passwordToken: token
             })
         })
-        .catch(err => console.log(err));
+        .catch(err => {
+            const error = new Error(err);
+            err.httpStatusCode = 500;
+            return next(error);
+        });
 
 }
 
@@ -220,5 +236,9 @@ exports.postNewPassword = (req, res, next) => {
         .then(() => {
             res.redirect('/login');
         })
-        .catch(err => console.log(err))
+        .catch(err => {
+            const error = new Error(err);
+            err.httpStatusCode = 500;
+            return next(error);
+        })
 }

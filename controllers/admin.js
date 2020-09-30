@@ -12,7 +12,7 @@ exports.getAddProduct = (req, res) => {
     })
 };
 
-exports.postAddProduct = (req, res) => {
+exports.postAddProduct = (req, res, next) => {
     const { title, imageUrl, price, description } = req.body;
     const errors = validationResult(req);
     
@@ -34,7 +34,11 @@ exports.postAddProduct = (req, res) => {
             console.log('Product has added :)')
             res.redirect('/admin/products');
         })
-        .catch(err => console.log(err));
+        .catch(err => {
+            const error = new Error(err);
+            err.httpStatusCode = 500;
+            return next(error);
+        });
 };
 
 exports.getEditProduct = (req, res) => {
@@ -60,7 +64,11 @@ exports.getEditProduct = (req, res) => {
                 hasError: false
             })
         })
-        .catch(err => console.log(err))
+        .catch(err => {
+            const error = new Error(err);
+            err.httpStatusCode = 500;
+            return next(error);
+        })
 };
 
 exports.postEditProduct = (req, res) => {
@@ -96,7 +104,11 @@ exports.postEditProduct = (req, res) => {
                 res.redirect('/admin/products');
             })
         })
-        .catch(err => console.log(err));
+        .catch(err => {
+            const error = new Error(err);
+            err.httpStatusCode = 500;
+            return next(error);
+        });
 };
 
 exports.getAdminProducts = (req, res) => {
@@ -108,7 +120,11 @@ exports.getAdminProducts = (req, res) => {
                 path: '/admin/products'
             });
         })
-        .catch(err => console.log(err));
+        .catch(err => {
+            const error = new Error(err);
+            err.httpStatusCode = 500;
+            return next(error);
+        });
 }
 
 exports.deleteProduct = (req, res) => {
@@ -117,5 +133,9 @@ exports.deleteProduct = (req, res) => {
         .then(() => {
             res.redirect('/admin/products');
         })
-        .catch(err => console.log(err))
+        .catch(err => {
+            const error = new Error(err);
+            err.httpStatusCode = 500;
+            return next(error);
+        })
 }

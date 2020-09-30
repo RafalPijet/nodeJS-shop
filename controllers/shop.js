@@ -10,7 +10,11 @@ exports.getProducts = (req, res) => {
                 path: '/products'
             });
         })
-        .catch(err => console.log(err))
+        .catch(err => {
+            const error = new Error(err);
+            err.httpStatusCode = 500;
+            return next(error);
+        })
 };
 
 exports.getProductById = (req, res) => {
@@ -45,7 +49,11 @@ exports.getCart = (req, res) => {
                 cartProducts: products
             });
         })
-        .catch(err => console.log(err))
+        .catch(err => {
+            const error = new Error(err);
+            err.httpStatusCode = 500;
+            return next(error);
+        })
 }
 
 exports.postCart = (req, res) => {
@@ -65,7 +73,11 @@ exports.deleteItemCart = (req, res) => {
         .then(() => {
             res.redirect('/cart');
         })
-        .catch(err => console.log(err));
+        .catch(err => {
+            const error = new Error(err);
+            err.httpStatusCode = 500;
+            return next(error);
+        });
 };
 
 
@@ -111,5 +123,9 @@ exports.postOrder = (req, res) => {
         .then(() => {
             res.redirect('/orders');
         })
-        .catch(err => console.log(err));
+        .catch(err => {
+            const error = new Error(err);
+            err.httpStatusCode = 500;
+            return next(error);
+        });
 }

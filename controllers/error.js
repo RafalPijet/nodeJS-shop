@@ -5,3 +5,12 @@ exports.get404Page = (req, res) => {
         path: ''
     })
 }
+
+exports.get500Page = (req, res) => {
+    res.status(500).render('500',
+        {
+            docTitle: '500',
+            path: ''
+        }
+    )
+}
