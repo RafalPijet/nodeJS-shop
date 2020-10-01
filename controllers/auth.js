@@ -37,7 +37,7 @@ exports.getLogin = (req, res, next) => {
 exports.postLogin = (req, res, next) => {
     const { password, email } = req.body;
     const errors = validationResult(req);
-
+    
     if (!errors.isEmpty()) {
         return res.status(422).render('auth/login', {
             path: '/login',
@@ -51,7 +51,7 @@ exports.postLogin = (req, res, next) => {
         .then(user => {
             bcrypt.compare(password, user.password)
                 .then(isMatch => {
-
+                    
                     if (isMatch) {
                         req.session.isLoggedIn = true;
                         req.session.user = user;
@@ -61,6 +61,14 @@ exports.postLogin = (req, res, next) => {
                             res.redirect('/')
                         })
                     }
+                    res.render('auth/login', {
+                        docTitle: 'Login',
+                        path: '/login',
+                        errorMessage: 'Incorrect password. Try again...',
+                        oldInput: { email, password: '' },
+                        validationErrors: []
+                    })
+                    
                 })
                 .catch(err => {
                     console.log(err);

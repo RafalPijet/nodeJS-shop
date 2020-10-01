@@ -7,6 +7,7 @@ const session = require('express-session');
 const MongoDBStore = require('connect-mongodb-session')(session);
 const csrf = require('csurf');
 const flash = require('connect-flash');
+const multer = require('multer');
 
 const rootDir = require('./util/path');
 const adminRoutes = require('./routes/admin');
@@ -23,10 +24,32 @@ const store = new MongoDBStore({
 
 const csrfProtection = csrf();
 
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'images')
+    },
+    filename: (req, file, cb) => {
+        cb(null, new Date().toISOString() + '-' + file.originalname);
+    }
+})
+
+const fileFilter = (req, file, cb) => {
+
+    if (file.mimetype === 'image/png' ||
+        file.mimetype === 'image/jpg' ||
+        file.mimetype === 'image/jpeg') {
+        cb(null, true)
+    } else {
+        cb(null, false)
+    }
+}
+
 app.set('view engine', 'ejs');
 app.set('views', 'views');
-app.use(bodyParser.urlencoded({extended: false}));
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(multer({ storage, fileFilter }).single('image'));
 app.use(express.static(path.join(rootDir, 'public')));
+app.use('/images', express.static(path.join(rootDir, 'images')));
 // app.use(express.urlencoded({extended: false}));
 app.use(session({
     secret: process.env.SESSION_KEY,
@@ -49,7 +72,7 @@ app.use((req, res, next) => {
     if (req.session.isLoggedIn) {
         User.findById(req.session.user._id)
             .then(user => {
-                
+
                 if (!user) {
                     return next();
                 }

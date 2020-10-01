@@ -14,6 +14,7 @@
                             <li class="orders__products-item"><%= product.product.title %> (<%= product.quantity %>)</li>
                         <% }) %>
                     </ul>
+                    <a class="invoice" target="_blank" href="/orders/<%= order._id %>">Invoice-<%= order._id %>.pdf</a>
                 </li>
             <% }); %>
         </ul>
