@@ -2,7 +2,7 @@ const { validationResult } = require('express-validator/check');
 const Product = require('../models/product');
 const fileHandling = require('../util/file');
 
-const ITEMS_PER_PAGE = 1;
+const ITEMS_PER_PAGE = 2;
 
 exports.getAddProduct = (req, res) => {
     res.render('admin/edit-product', {
@@ -178,4 +178,24 @@ exports.deleteProduct = (req, res) => {
             err.httpStatusCode = 500;
             return next(error);
         })
+}
+
+exports.deleteProductAsync = (req, res) => {
+    const { productId } = req.params;
+    Product.findById(productId)
+    .then(product => {
+
+        if (!product) {
+            return next(new Error("Product not found!!!"))
+        }
+        fileHandling.deleteFile(product.imageUrl)
+        return Product.deleteOne({_id: productId, userId: req.user._id})
+    })
+    .then(() => {
+        res.status(200).json({message: 'Success!'})
+    })
+    .catch(err => {
+        res.status(500).json({message: 'Deleting product failed!'})
+    })
+    
 }

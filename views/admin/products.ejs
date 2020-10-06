@@ -19,13 +19,19 @@
                     <h2 class="product__price">$<%=product.price%></h2>
                     <p class="product__description"><%=product.description%></p>
                 </div>
-                <div class="card__actions">
+                <!-- <div class="card__actions">
                     <a href="edit-product/<%= product._id%>/?edit=true" class="btn">Edit</a>
                     <form action="delete-product/<%= product._id%>" method="POST">
-                        <button type="submit" class="btn">Delete</button>
+                        <button type="button" class="btn" onclick="deleteProduct(this)">Delete</button>
                         <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                         <input type="hidden" name="imageUrl" value="<%= product.imageUrl %>">
                     </form>
+                </div> -->
+                <div class="card__actions">
+                    <a href="edit-product/<%= product._id%>/?edit=true" class="btn">Edit</a>
+                    <button type="button" class="btn" onclick="deleteProduct(this)">Delete</button>
+                    <input type="hidden" name="productId" value="<%= product._id %>">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                 </div>
             </article>
             <% } %>
@@ -38,3 +44,4 @@
         <% } %>
     </main>
     <%- include('../includes/end.ejs')%>
+    <script src="/js/admin.js"></script>
