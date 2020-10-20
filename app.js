@@ -1,5 +1,6 @@
 const express = require('express');
 const path = require('path');
+const fs = require('fs');
 require('dotenv').config();
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
@@ -8,6 +9,9 @@ const MongoDBStore = require('connect-mongodb-session')(session);
 const csrf = require('csurf');
 const flash = require('connect-flash');
 const multer = require('multer');
+const helmet = require('helmet');
+const compression = require('compression');
+const morgan = require('morgan');
 
 const rootDir = require('./util/path');
 const adminRoutes = require('./routes/admin');
@@ -44,8 +48,13 @@ const fileFilter = (req, file, cb) => {
     }
 }
 
+const accesLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), { flags: 'a' });
+
 app.set('view engine', 'ejs');
 app.set('views', 'views');
+app.use(helmet());
+app.use(compression());
+app.use(morgan('combined', { stream: accesLogStream }));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(multer({ storage, fileFilter }).single('image'));
 app.use(express.static(path.join(rootDir, 'public')));
